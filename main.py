@@ -15,7 +15,6 @@ from miln        import miln
 from runge       import rungstep, rungforecast
 
 
-# ------------------------------------------------------------------ уравнения
 
 EQUATIONS = {
     "y' = y":       (lambda x, y: y,           lambda x, c: c * math.exp(x)),
@@ -25,19 +24,10 @@ EQUATIONS = {
     "y' = x^2 - y": (lambda x, y: x**2 - y,   None),
 }
 
-# Для уравнений с точным решением зависящим от C, вычисляем C из начального условия
 def get_exact(eq_name, x0, y0):
     _, exact_template = EQUATIONS[eq_name]
     if exact_template is None:
         return None
-    # Находим C из y0 = exact(x0, C)
-    # Для простых случаев: y0 = C * f(x0) + g(x0) => C = (y0 - g(x0)) / f(x0)
-    # Проще: точное решение параметрически зависит от C
-    # Подберём C численно (бинарным поиском не нужно — у нас простые формулы)
-    # Напрямую: для y'=y -> y=C*e^x, C=y0/e^x0
-    #           для y'=-y -> C=y0*e^x0
-    #           для y'=x -> C=y0 - x0^2/2
-    #           для y'=sin(x) -> C = y0 + cos(x0)
     name = eq_name
     if name == "y' = y":
         C = y0 / math.exp(x0)
@@ -68,7 +58,7 @@ METHOD_COLORS = {
 ZOOM_MIN, ZOOM_MAX = 1e-6, 1e6
 
 
-# ------------------------------------------------------------------ GUI
+
 
 class App(tk.Tk):
     def __init__(self):
@@ -88,7 +78,7 @@ class App(tk.Tk):
     def _on_close(self):
         plt.close("all"); self.destroy(); sys.exit(0)
 
-    # ------------------------------------------------------------------ UI
+
 
     def _build_ui(self):
         left = tk.Frame(self, bg="#1e1e2e", width=400)
@@ -176,7 +166,7 @@ class App(tk.Tk):
         self.fig.canvas.mpl_connect("motion_notify_event",  self._on_motion)
         self.fig.canvas.mpl_connect("scroll_event",         self._on_scroll)
 
-    # ------------------------------------------------------------------ plot events
+
 
     def _on_click(self, event):
         if event.button == MouseButton.MIDDLE and event.inaxes == self.ax:
@@ -208,7 +198,7 @@ class App(tk.Tk):
         self.ax.set_ylim(cy+(yl[0]-cy)*factor, cy+(yl[1]-cy)*factor)
         self.canvas.draw_idle()
 
-    # ------------------------------------------------------------------ compute
+
 
     def _parse(self):
         MAX_VAL = 1e6
@@ -282,7 +272,6 @@ class App(tk.Tk):
             except Exception as e:
                 errors[name] = str(e)
 
-        # многошаговые — по точному решению если есть, иначе просто считаем
         for name, method in MULTI_STEP.items():
             try:
                 if exact is not None:

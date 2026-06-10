@@ -20,19 +20,8 @@ def rungstep(method,f,x0,y0,xn,h,eps,p):
     return (xh,yh),h
 
 def rungforecast(method,f,x0,y0,xn,h,eps,exact_fn):
-    R = eps + 1
-    xh, yh = [], []
-    h = h * 2
-    for i in range(200):
-        h = h / 2
-        n = make_n(x0, xn, h)
-        xh, yh = method(f, x0, y0, h, n)
-        R = max([abs(yh[i]-exact_fn(xh[i])) for i in range(n)])
-        if R<=eps:
-            break
-    else:
-        raise ValueError(
-            f"Метод не сошелся за 1000 итераций к нужной погрешности.")
+    n = make_n(x0,xn,h)
+    xh, yh = method(f, x0, y0, h, n, eps)
     return (xh,yh),h
 
 
